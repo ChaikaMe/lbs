@@ -45,6 +45,7 @@ export default function TreeComponent() {
           const data = { ...node };
           if (data.selected) {
             dispatch(setSelectedItem(null));
+            dispatch(setSelectedDiagram(null));
           } else {
             dispatch(setSelectedItem(data));
           }
