@@ -32,6 +32,7 @@ export default function ControlPanel({
       dispatch(deleteItem(key)).then(
         dispatch(setItemsState(tempData))
       );
+      dispatch(setSelectedDiagram(null));
     } else {
       const parentId = findParentById(diagrams, key);
       const changedItem = tempData.filter(
@@ -42,7 +43,6 @@ export default function ControlPanel({
       ).then(dispatch(setItemsState(tempData)));
     }
     dispatch(setSelectedItem(null));
-    dispatch(setSelectedDiagram(null));
   };
 
   const [inputValue, setInputValue] = useState(
