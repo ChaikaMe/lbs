@@ -10,13 +10,17 @@ import {
 import Tree from "rc-tree";
 import dataToTreeConvert from "../../helpers/dataToTreeConvert";
 import ControlPanel from "../ControlPanel/ControlPanel";
-import { selectSelectedItem } from "../../redux/diagram/selectors";
+import {
+  selectSelectedDiagram,
+  selectSelectedItem,
+} from "../../redux/diagram/selectors";
 import findTopParentById from "../../helpers/findFatherById";
 
 export default function TreeComponent() {
   const dispatch = useDispatch();
   const diagrams = useSelector(selectDiagrams);
   const selectedItem = useSelector(selectSelectedItem);
+  const selectedDiagram = useSelector(selectSelectedDiagram);
   const [renameState, setRenameState] = useState(false);
 
   useEffect(() => {
@@ -45,7 +49,8 @@ export default function TreeComponent() {
           const data = { ...node };
           if (data.selected) {
             dispatch(setSelectedItem(null));
-            dispatch(setSelectedDiagram(null));
+            if (data.key === selectedDiagram)
+              dispatch(setSelectedDiagram(null));
           } else {
             dispatch(setSelectedItem(data));
           }
