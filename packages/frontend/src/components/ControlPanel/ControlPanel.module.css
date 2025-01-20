@@ -1,0 +1,26 @@
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  text-align: center;
+  height: 25px;
+}
+
+.buttonWrapper {
+  display: flex;
+  gap: 4px;
+}
+
+.button {
+  width: 33.33%;
+  height: 30px;
+  cursor: pointer;
+}
+
+.input {
+  height: 25px;
+}
