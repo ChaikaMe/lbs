@@ -11,17 +11,13 @@ import {
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 import NormalNode from "../NormalNode/NormalNode";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  selectDiagrams,
-  setItemsState,
-} from "../../redux/diagram/slice";
+import { selectDiagrams } from "../../redux/diagram/slice";
 import { selectSelectedDiagram } from "../../redux/diagram/selectors";
 import dataToNodesConvert from "../../helpers/dataToNodesConvert";
-import patchItemById from "../../helpers/patchItemById";
-import { patchItem } from "../../redux/diagram/operations";
+import changingPosition from "../../helpers/canvas/changingPosition";
 
 const initialEdges = [];
 
@@ -33,7 +29,6 @@ export default function Canvas() {
   const diagrams = useSelector(selectDiagrams);
   const selectedDiagram = useSelector(selectSelectedDiagram);
   const dispatch = useDispatch();
-  const timeoutRef = useRef(null);
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] =
@@ -44,24 +39,18 @@ export default function Canvas() {
       onNodesChange(changes);
       changes.forEach((change) => {
         if (change.type === "position" && change.dragging === false) {
-          const tempData = patchItemById(
+          changingPosition(
             diagrams,
-            change.id,
-            change.position
+            change,
+            selectedDiagram,
+            dispatch
           );
-          dispatch(setItemsState(tempData));
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-          timeoutRef.current = setTimeout(() => {
-            const changedItem = diagrams.find(
-              (diagram) => diagram._id === selectedDiagram
-            );
-            dispatch(
-              patchItem({
-                itemId: selectedDiagram,
-                updatedData: changedItem,
-              })
-            );
-          }, 2000);
+        }
+        if (
+          change.type === "dimensions" &&
+          change.resizing === true
+        ) {
+          console.log("+");
         }
       });
     },
@@ -70,10 +59,7 @@ export default function Canvas() {
 
   useEffect(() => {
     if (selectedDiagram) {
-      const currentDiagram = dataToNodesConvert(
-        diagrams.find((diagram) => diagram._id === selectedDiagram)
-      );
-      setNodes(currentDiagram);
+      setNodes(dataToNodesConvert(selectedDiagram));
     } else {
       setNodes([]);
     }

@@ -3,11 +3,11 @@ export default function findTopParentById(data, id) {
     if (element.blocks && element.blocks.length > 0) {
       const found = findElementById(element.blocks, id);
       if (found) {
-        return element._id;
+        return element;
       } else {
         const parent = findTopParentById(element.blocks, id);
         if (parent) {
-          return parent._id;
+          return parent;
         }
       }
     }

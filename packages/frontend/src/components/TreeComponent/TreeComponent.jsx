@@ -27,7 +27,13 @@ export default function TreeComponent() {
     if (selectedItem) {
       const tempData = findTopParentById(diagrams, selectedItem.key);
       dispatch(
-        setSelectedDiagram(tempData ? tempData : selectedItem.key)
+        setSelectedDiagram(
+          tempData
+            ? tempData
+            : diagrams.find(
+                (diagram) => diagram._id === selectedItem.key
+              )
+        )
       );
     }
   }, [selectedItem, dispatch, diagrams]);

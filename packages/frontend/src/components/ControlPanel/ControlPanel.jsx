@@ -8,7 +8,6 @@ import {
   setSelectedItem,
 } from "../../redux/diagram/slice";
 import removeObjectById from "../../helpers/removeObjectById";
-import findParentById from "../../helpers/findFatherById";
 import {
   deleteItem,
   patchItem,
@@ -17,6 +16,7 @@ import {
 import { useState } from "react";
 import patchItemById from "../../helpers/patchItemById";
 import { v4 as uuidv4 } from "uuid";
+import { selectSelectedDiagram } from "../../redux/diagram/selectors";
 
 export default function ControlPanel({
   data,
@@ -25,21 +25,23 @@ export default function ControlPanel({
 }) {
   const dispatch = useDispatch();
   const diagrams = useSelector(selectDiagrams);
+  const choosedDiagram = useSelector(selectSelectedDiagram);
 
   const onDelete = (key) => {
     const tempData = removeObjectById(diagrams, key);
     if (diagrams.find((diagram) => diagram._id === key)) {
-      dispatch(deleteItem(key)).then(
-        dispatch(setItemsState(tempData))
-      );
-      dispatch(setSelectedDiagram(null));
+      dispatch(deleteItem(key))
+        .then(dispatch(setItemsState(tempData)))
+        .then(dispatch(setSelectedDiagram(null)));
     } else {
-      const parentId = findParentById(diagrams, key);
-      const changedItem = tempData.filter(
-        (diagram) => diagram._id === parentId
-      )[0];
+      const changedItem = tempData.find(
+        (diagram) => diagram._id === choosedDiagram._id
+      );
       dispatch(
-        patchItem({ itemId: parentId, updatedData: changedItem })
+        patchItem({
+          itemId: choosedDiagram._id,
+          updatedData: changedItem,
+        })
       ).then(dispatch(setItemsState(tempData)));
     }
     dispatch(setSelectedItem(null));
@@ -50,7 +52,8 @@ export default function ControlPanel({
   );
   const onRenameToggle = (key) => {
     if (renameState && inputValue !== "-") {
-      const tempData = patchItemById(diagrams, key, inputValue);
+      const type = "newName";
+      const tempData = patchItemById(diagrams, key, inputValue, type);
       if (tempData.some((diagram) => diagram._id === key)) {
         const diagram = tempData.find(
           (diagram) => diagram._id === key
@@ -62,13 +65,12 @@ export default function ControlPanel({
           })
         ).then(dispatch(setItemsState(tempData)));
       } else {
-        const parentId = findParentById(diagrams, key);
-        const changedItem = tempData.filter(
-          (diagram) => diagram._id === parentId
-        )[0];
+        const changedItem = tempData.find(
+          (diagram) => diagram._id === choosedDiagram._id
+        );
         dispatch(
           patchItem({
-            itemId: parentId,
+            itemId: choosedDiagram._id,
             updatedData: changedItem,
           })
         ).then(dispatch(setItemsState(tempData)));
@@ -85,6 +87,7 @@ export default function ControlPanel({
   };
 
   const onCreate = (data) => {
+    const type = "newBlock";
     if (data === null) {
       const tempData = {
         diagramName: "New Diagram",
@@ -100,7 +103,12 @@ export default function ControlPanel({
         position: { x: 0, y: 0 },
         id: randomId,
       };
-      const tempData = patchItemById(diagrams, data.key, newBlock);
+      const tempData = patchItemById(
+        diagrams,
+        data.key,
+        newBlock,
+        type
+      );
       if (tempData.some((diagram) => diagram._id === data.key)) {
         const diagram = tempData.find(
           (diagram) => diagram._id === data.key
@@ -112,13 +120,12 @@ export default function ControlPanel({
           })
         ).then(dispatch(setItemsState(tempData)));
       } else {
-        const parentId = findParentById(diagrams, data.key);
-        const changedItem = tempData.filter(
-          (diagram) => diagram._id === parentId
-        )[0];
+        const changedItem = tempData.find(
+          (diagram) => diagram._id === choosedDiagram._id
+        );
         dispatch(
           patchItem({
-            itemId: parentId,
+            itemId: choosedDiagram._id,
             updatedData: changedItem,
           })
         ).then(dispatch(setItemsState(tempData)));
