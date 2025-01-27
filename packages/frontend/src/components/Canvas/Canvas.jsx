@@ -56,7 +56,6 @@ export default function Canvas() {
     },
     [onNodesChange, diagrams, dispatch, selectedDiagram]
   );
-
   useEffect(() => {
     if (selectedDiagram) {
       setNodes(dataToNodesConvert(selectedDiagram));

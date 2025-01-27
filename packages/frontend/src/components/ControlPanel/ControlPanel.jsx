@@ -28,25 +28,26 @@ export default function ControlPanel({
   const choosedDiagram = useSelector(selectSelectedDiagram);
 
   const onDelete = (key) => {
-    const tempData = removeObjectById(diagrams, key);
-    if (diagrams.find((diagram) => diagram._id === key)) {
+    const tempData = removeObjectById(diagrams, key, choosedDiagram);
+    if (key === choosedDiagram._id) {
       dispatch(deleteItem(key))
         .then(dispatch(setItemsState(tempData)))
-        .then(dispatch(setSelectedDiagram(null)));
+        .then(dispatch(setSelectedDiagram(null)))
+        .catch((error) => console.error(error));
     } else {
-      const changedItem = tempData.find(
-        (diagram) => diagram._id === choosedDiagram._id
-      );
+      const newDiagrams = [
+        ...diagrams.filter((diagram) => diagram._id !== tempData._id),
+        tempData,
+      ];
       dispatch(
         patchItem({
           itemId: choosedDiagram._id,
-          updatedData: changedItem,
+          updatedData: tempData,
         })
-      ).then(dispatch(setItemsState(tempData)));
+      ).then(dispatch(setItemsState(newDiagrams)));
     }
     dispatch(setSelectedItem(null));
   };
-
   const [inputValue, setInputValue] = useState(
     data ? data.title : "-"
   );
