@@ -16,7 +16,7 @@ import NormalNode from "../NormalNode/NormalNode";
 import { useDispatch, useSelector } from "react-redux";
 import { selectDiagrams } from "../../redux/diagram/slice";
 import { selectSelectedDiagram } from "../../redux/diagram/selectors";
-import dataToNodesConvert from "../../helpers/dataToNodesConvert";
+import dataToNodesConvert from "../../helpers/converters/dataToNodesConvert";
 import changingPosition from "../../helpers/canvas/changingPosition";
 
 const initialEdges = [];

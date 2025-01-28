@@ -8,15 +8,14 @@ import {
   setSelectedItem,
 } from "../../redux/diagram/slice";
 import removeObjectById from "../../helpers/removeObjectById";
-import {
-  deleteItem,
-  patchItem,
-  postItem,
-} from "../../redux/diagram/operations";
+import { deleteItem, postItem } from "../../redux/diagram/operations";
 import { useState } from "react";
 import patchItemById from "../../helpers/patchItemById";
 import { v4 as uuidv4 } from "uuid";
 import { selectSelectedDiagram } from "../../redux/diagram/selectors";
+import patchDataInDiagram from "../../helpers/diagram/patchBlockInDiagram";
+import newDataExample from "../../utils/newDataExample";
+import patchTypes from "../../utils/patchTypes";
 
 export default function ControlPanel({
   data,
@@ -27,6 +26,10 @@ export default function ControlPanel({
   const diagrams = useSelector(selectDiagrams);
   const choosedDiagram = useSelector(selectSelectedDiagram);
 
+  const [inputValue, setInputValue] = useState(
+    data ? data.title : "-"
+  );
+
   const onDelete = (key) => {
     const tempData = removeObjectById(diagrams, key, choosedDiagram);
     if (key === choosedDiagram._id) {
@@ -35,47 +38,19 @@ export default function ControlPanel({
         .then(dispatch(setSelectedDiagram(null)))
         .catch((error) => console.error(error));
     } else {
-      const newDiagrams = [
-        ...diagrams.filter((diagram) => diagram._id !== tempData._id),
-        tempData,
-      ];
-      dispatch(
-        patchItem({
-          itemId: choosedDiagram._id,
-          updatedData: tempData,
-        })
-      ).then(dispatch(setItemsState(newDiagrams)));
+      patchDataInDiagram(diagrams, tempData, dispatch);
     }
     dispatch(setSelectedItem(null));
   };
-  const [inputValue, setInputValue] = useState(
-    data ? data.title : "-"
-  );
   const onRenameToggle = (key) => {
     if (renameState && inputValue !== "-") {
-      const type = "newName";
-      const tempData = patchItemById(diagrams, key, inputValue, type);
-      if (tempData.some((diagram) => diagram._id === key)) {
-        const diagram = tempData.find(
-          (diagram) => diagram._id === key
-        );
-        dispatch(
-          patchItem({
-            itemId: diagram._id,
-            updatedData: diagram,
-          })
-        ).then(dispatch(setItemsState(tempData)));
-      } else {
-        const changedItem = tempData.find(
-          (diagram) => diagram._id === choosedDiagram._id
-        );
-        dispatch(
-          patchItem({
-            itemId: choosedDiagram._id,
-            updatedData: changedItem,
-          })
-        ).then(dispatch(setItemsState(tempData)));
-      }
+      const tempData = patchItemById(
+        choosedDiagram,
+        key,
+        inputValue,
+        patchTypes.onRename
+      );
+      patchDataInDiagram(diagrams, tempData, dispatch);
       dispatch(
         setSelectedItem({
           ...data,
@@ -86,51 +61,19 @@ export default function ControlPanel({
     setInputValue(data.title);
     setRenameState((prev) => !prev);
   };
-
   const onCreate = (data) => {
-    const type = "newBlock";
     if (data === null) {
-      const tempData = {
-        diagramName: "New Diagram",
-        blocks: [],
-        connections: [],
-      };
-      dispatch(postItem(tempData));
+      dispatch(postItem(newDataExample.diagram));
     } else {
       const randomId = uuidv4();
-      const newBlock = {
-        name: "New Block",
-        blocks: [],
-        position: { x: 0, y: 0 },
-        id: randomId,
-      };
+      const newBlock = { ...newDataExample.block, id: randomId };
       const tempData = patchItemById(
-        diagrams,
+        choosedDiagram,
         data.key,
         newBlock,
-        type
+        patchTypes.onCreate
       );
-      if (tempData.some((diagram) => diagram._id === data.key)) {
-        const diagram = tempData.find(
-          (diagram) => diagram._id === data.key
-        );
-        dispatch(
-          patchItem({
-            itemId: diagram._id,
-            updatedData: diagram,
-          })
-        ).then(dispatch(setItemsState(tempData)));
-      } else {
-        const changedItem = tempData.find(
-          (diagram) => diagram._id === choosedDiagram._id
-        );
-        dispatch(
-          patchItem({
-            itemId: choosedDiagram._id,
-            updatedData: changedItem,
-          })
-        ).then(dispatch(setItemsState(tempData)));
-      }
+      patchDataInDiagram(diagrams, tempData, dispatch);
     }
   };
 
@@ -149,7 +92,7 @@ export default function ControlPanel({
         <button
           className={css.button}
           onClick={() => onDelete(data.key)}
-          disabled={renameState}
+          disabled={renameState || !data}
         >
           Delete
         </button>

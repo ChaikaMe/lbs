@@ -8,7 +8,7 @@ import {
   setSelectedItem,
 } from "../../redux/diagram/slice";
 import Tree from "rc-tree";
-import dataToTreeConvert from "../../helpers/dataToTreeConvert";
+import dataToTreeConvert from "../../helpers/converters/dataToTreeConvert";
 import ControlPanel from "../ControlPanel/ControlPanel";
 import {
   selectSelectedDiagram,
