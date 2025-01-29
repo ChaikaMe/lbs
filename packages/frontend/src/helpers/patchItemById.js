@@ -22,8 +22,12 @@ export default function patchItemById(data, id, newData, type) {
 function switchFunction(item, newData, type) {
   switch (type) {
     case "position": {
-      const tempData = { ...item.position, ...newData };
+      const tempData = { ...item.position, ...newData.position };
       return { ...item, position: tempData };
+    }
+    case "dimensions": {
+      const tempData = { ...item.dimensions, ...newData.measured };
+      return { ...item, dimensions: tempData };
     }
     case "newBlock": {
       const tempData = [...item.blocks, newData];

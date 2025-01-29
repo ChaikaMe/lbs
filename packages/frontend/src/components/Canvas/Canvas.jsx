@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectDiagrams } from "../../redux/diagram/slice";
 import { selectSelectedDiagram } from "../../redux/diagram/selectors";
 import dataToNodesConvert from "../../helpers/converters/dataToNodesConvert";
-import changingPosition from "../../helpers/canvas/changingPosition";
+import updateBlockSettings from "../../helpers/canvas/updateBlockSettings";
 
 const initialEdges = [];
 
@@ -34,35 +34,35 @@ export default function Canvas() {
   const [edges, setEdges, onEdgesChange] =
     useEdgesState(initialEdges);
 
+  useEffect(() => {
+    if (selectedDiagram) {
+      setNodes(dataToNodesConvert(selectedDiagram));
+      // console.log(nodes); // measured: {height: x, width: y}
+    } else {
+      setNodes([]);
+    }
+  }, [selectedDiagram, diagrams, setNodes]);
+
   const handleNodesChange = useCallback(
     (changes) => {
       onNodesChange(changes);
       changes.forEach((change) => {
-        if (change.type === "position" && change.dragging === false) {
-          changingPosition(
+        if (
+          (change.type === "position" && change.dragging === false) ||
+          (change.type === "dimensions" && change.resizing === false)
+        ) {
+          console.log(change);
+          updateBlockSettings(
             diagrams,
             change,
-            selectedDiagram,
-            dispatch
+            dispatch,
+            selectedDiagram
           );
-        }
-        if (
-          change.type === "dimensions" &&
-          change.resizing === true
-        ) {
-          console.log("+");
         }
       });
     },
     [onNodesChange, diagrams, dispatch, selectedDiagram]
   );
-  useEffect(() => {
-    if (selectedDiagram) {
-      setNodes(dataToNodesConvert(selectedDiagram));
-    } else {
-      setNodes([]);
-    }
-  }, [selectedDiagram, diagrams, setNodes]);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),

@@ -13,7 +13,7 @@ import { useState } from "react";
 import patchItemById from "../../helpers/patchItemById";
 import { v4 as uuidv4 } from "uuid";
 import { selectSelectedDiagram } from "../../redux/diagram/selectors";
-import patchDataInDiagram from "../../helpers/diagram/patchBlockInDiagram";
+import patchDataInDiagram from "../../helpers/diagram/patchDataInDiagram";
 import newDataExample from "../../utils/newDataExample";
 import patchTypes from "../../utils/patchTypes";
 
@@ -42,6 +42,7 @@ export default function ControlPanel({
     }
     dispatch(setSelectedItem(null));
   };
+
   const onRenameToggle = (key) => {
     if (renameState && inputValue !== "-") {
       const tempData = patchItemById(
@@ -61,6 +62,7 @@ export default function ControlPanel({
     setInputValue(data.title);
     setRenameState((prev) => !prev);
   };
+
   const onCreate = (data) => {
     if (data === null) {
       dispatch(postItem(newDataExample.diagram));
